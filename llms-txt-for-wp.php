@@ -14,19 +14,24 @@
  * @package LLMsTxtForWP
  */
 
-// If this file is called directly, abort.
+// Abort if this file is called directly.
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// Plugin version and constants
+// Define constants.
 define( 'LLMS_TXT_VERSION', '1.0.0' );
 define( 'LLMS_TXT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'LLMS_TXT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'LLMS_TXT_PLUGIN_FILE', __FILE__ );
 
-// Load the core class
+// Include Composer autoloader if available.
+if ( file_exists( LLMS_TXT_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
+	require LLMS_TXT_PLUGIN_DIR . 'vendor/autoload.php';
+}
+
+// Load the core class.
 require LLMS_TXT_PLUGIN_DIR . 'includes/class-llms-txt-core.php';
 
-// Initialize the plugin
+// Initialize the plugin.
 new LLMS_Txt_Core();

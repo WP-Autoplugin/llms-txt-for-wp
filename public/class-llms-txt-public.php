@@ -8,13 +8,6 @@
 class LLMS_Txt_Public {
 
 	/**
-	 * Initialize the class.
-	 */
-	public function __construct() {
-		add_filter( 'query_vars', array( $this, 'add_query_vars' ) );
-	}
-
-	/**
 	 * Add custom query vars.
 	 *
 	 * @param array $vars The array of query vars.
@@ -30,20 +23,35 @@ class LLMS_Txt_Public {
 	 * Add rewrite rules for markdown endpoints.
 	 */
 	public function add_rewrite_rules() {
-		$settings = LLMS_Txt_Core::get_settings();
-
 		add_rewrite_rule(
-			'llms.txt$',
+			'^llms\.txt$',
 			'index.php?llms_txt=1',
 			'top'
 		);
+	}
 
-		if ( 'yes' === $settings['enable_md_support'] ) {
-			add_rewrite_rule(
-				'(.?.+?)\.md$',
-				'index.php?pagename=$matches[1]&markdown=1',
-				'top'
-			);
+	/**
+	 * Instead of using rewrite rules, we'll parse the request ourselves
+	 */
+	public function parse_request( $wp ) {
+
+		$settings = LLMS_Txt_Core::get_settings();
+
+		if ( 'yes' !== $settings['enable_md_support'] ) {
+			return;
+		}
+
+		$server_request_uri = $_SERVER['REQUEST_URI'];
+		$_SERVER['REQUEST_URI'] = preg_replace( '/\.md$/', '', $_SERVER['REQUEST_URI'] );
+
+		// Check if the current URL ends with .md
+		if ( preg_match( '/\.md$/', $server_request_uri ) && ! preg_match( '|^/wp-admin/|', $server_request_uri ) ) {
+
+			// Let WordPress parse the clean URL normally
+			$wp->parse_request();
+
+			// Now add our markdown flag
+			$wp->query_vars['markdown'] = 1;
 		}
 	}
 
@@ -51,6 +59,7 @@ class LLMS_Txt_Public {
 	 * Handle markdown requests.
 	 */
 	public function handle_markdown_requests() {
+
 		$settings = LLMS_Txt_Core::get_settings();
 
 		if ( 'yes' !== $settings['enable_md_support'] || ! get_query_var( 'markdown' ) ) {
@@ -62,14 +71,19 @@ class LLMS_Txt_Public {
 			return;
 		}
 
-		// Check if this post type should be included
-		if ( ! empty( $settings['selected_post'] ) && $post->ID !== intval( $settings['selected_post'] ) &&
-			! in_array( $post->post_type, $settings['post_types'], true ) ) {
+		// Check if this post should be included.
+		$should_include = in_array( $post->post_type, $settings['post_types'], true );
+		$should_include = apply_filters( 'llms_txt_include_post', $should_include, $post );
+		if ( ! $should_include ) {
 			return;
 		}
 
+		// Prepare the Markdown content.
+		$markdown_content = LLMS_Txt_Markdown::convert_post_to_markdown( $post, true );
+
+		// Output the Markdown content with proper headers.
 		header( 'Content-Type: text/markdown; charset=utf-8' );
-		echo $this->convert_to_markdown( $post, false );
+		echo $markdown_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Content is escaped in the conversion method.
 		exit;
 	}
 
@@ -77,28 +91,26 @@ class LLMS_Txt_Public {
 	 * Handle llms.txt requests.
 	 */
 	public function handle_llms_txt_requests() {
-		if ( ! isset( $_SERVER['REQUEST_URI'] ) || '/llms.txt' !== $_SERVER['REQUEST_URI'] ) {
+		if ( ! get_query_var( 'llms_txt' ) ) {
 			return;
 		}
 
 		$settings = LLMS_Txt_Core::get_settings();
-		$output = '';
+		$output   = '';
 
 		if ( ! empty( $settings['selected_post'] ) ) {
-
 			// Selected post/page.
 			$post = get_post( $settings['selected_post'] );
 			if ( $post ) {
 				// Output post title and content.
-				$output .= $this->convert_to_markdown( $post );
+				$output .= LLMS_Txt_Markdown::convert_post_to_markdown( $post );
 			}
 		} elseif ( ! empty( $settings['post_types'] ) ) {
-
 			// All posts, grouped by post type. Also include site name and description.
-			$output .= "# " . get_bloginfo( 'name' ) . "\n\n";
+			$output .= '# ' . esc_html( get_bloginfo( 'name' ) ) . "\n\n";
 			$bloginfo = get_bloginfo( 'description' );
 			if ( ! empty( $bloginfo ) ) {
-				$output .= $bloginfo . "\n\n";
+				$output .= esc_html( $bloginfo ) . "\n\n";
 			}
 			$output .= "---\n\n";
 
@@ -115,16 +127,15 @@ class LLMS_Txt_Public {
 
 					if ( ! empty( $posts ) ) {
 						$post_type_obj = get_post_type_object( $post_type );
-						$output .= "### " . $post_type_obj->labels->name . "\n\n";
+						$output       .= '### ' . esc_html( $post_type_obj->labels->name ) . "\n\n";
 
 						foreach ( $posts as $post ) {
-							$output .= "* [" . $post->post_title . "](" . get_permalink( $post ) . ".md)\n";
+							$output .= '* [' . esc_html( $post->post_title ) . '](' . esc_url( untrailingslashit( get_permalink( $post ) ) ) . ".md)\n";
 						}
 						$output .= "\n";
 					}
 				}
 			} else {
-
 				// If .md support is not enabled, show the post title and content.
 				foreach ( $settings['post_types'] as $post_type ) {
 					$posts = get_posts( array(
@@ -135,42 +146,24 @@ class LLMS_Txt_Public {
 
 					if ( ! empty( $posts ) ) {
 						foreach ( $posts as $post ) {
-							$output .= $this->convert_to_markdown( $post, true ) . "\n\n";
+							$output .= LLMS_Txt_Markdown::convert_post_to_markdown( $post, true ) . "\n\n";
 							$output .= "---\n\n";
 						}
 					}
 				}
 			}
+		} else {
+			$output .= '# ' . esc_html( get_bloginfo( 'name' ) ) . "\n\n";
+			$bloginfo = get_bloginfo( 'description' );
+			if ( ! empty( $bloginfo ) ) {
+				$output .= esc_html( $bloginfo ) . "\n\n";
+			}
+			$output .= "---\n\n";
 		}
 
-		header( 'Content-Type: text/markdown; charset=utf-8' );
-		echo apply_filters( 'llms_txt_index_content', $output );
+		// Output the llms.txt content with proper headers.
+		header( 'Content-Type: text/plain; charset=utf-8' );
+		echo apply_filters( 'llms_txt_index_content', $output ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Content is already escaped.
 		exit;
-	}
-
-	/**
-	 * Convert post content to markdown.
-	 *
-	 * @param WP_Post $post The post object.
-	 * @return string
-	 */
-	private function convert_to_markdown( $post, $include_meta = true ) {
-		if ( ! $post ) {
-			return '';
-		}
-
-		if ( $include_meta ) {
-			$markdown = "# " . $post->post_title . "\n\n";
-
-			// Add post meta
-			$markdown .= "Published: " . get_the_date( 'Y-m-d', $post ) . "\n";
-			$markdown .= "Author: " . get_the_author_meta( 'display_name', $post->post_author ) . "\n\n";
-		}
-
-		// Convert content
-		$content = apply_filters( 'the_content', $post->post_content );
-		$markdown .= LLMS_Txt_Markdown::convert( $content );
-
-		return apply_filters( 'llms_txt_markdown_content', $markdown, $post );
 	}
 }
