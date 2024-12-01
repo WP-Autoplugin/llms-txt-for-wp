@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: LLMs.txt for WP
- * Plugin URI: https://example.com/llms-txt-for-wp
+ * Plugin URI: https://github.com/WP-Autoplugin/llms-txt-for-wp
  * Description: Generates LLM-friendly content as llms.txt and provides markdown versions of posts.
  * Version: 1.0.0
- * Author: Your Name
- * Author URI: https://example.com
+ * Author: Balázs Piller
+ * Author URI: https://wp-autoplugin.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: llms-txt-for-wp

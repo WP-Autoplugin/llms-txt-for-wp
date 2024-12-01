@@ -99,7 +99,8 @@ class LLMS_Txt_Admin {
 				<p class="description" style="margin-bottom: -10px;">
 					<?php
 					printf(
-						esc_html__( 'With these settings, your llms.txt file will show %1$s.', 'llms-txt-for-wp' ),
+						esc_html__( 'With these settings, your %1$s file will show %2$s.', 'llms-txt-for-wp' ),
+						'<a href="' . esc_url( home_url( 'llms.txt' ) ) . '" target="_blank">llms.txt</a>',
 						'<strong id="llms-txt-settings-hint"></strong>'
 					);
 					?>
@@ -157,7 +158,7 @@ class LLMS_Txt_Admin {
 						}
 					}
 
-					if (hasMdSupport) {
+					if (hasMdSupport && types.length) {
 						hintHasMdSupport.style.display = 'inline';
 						hintNoMdSupport.style.display = 'none';
 						mdSupportPostTypes.textContent = types.join(', ');
@@ -169,6 +170,7 @@ class LLMS_Txt_Admin {
 				}
 
 				selectedPost.addEventListener('change', updateHint);
+				postsLimit.addEventListener('change', updateHint);
 				postTypes.forEach(function(type) {
 					type.addEventListener('change', updateHint);
 				});
@@ -214,7 +216,7 @@ class LLMS_Txt_Admin {
 		$args = array(
 			'public'   => true,
 		);
-		$args = apply_filters( 'llms_txt_post_types_args', $args );
+		$args = apply_filters( 'llms_txt_admin_post_types_args', $args );
 		$post_types = get_post_types( $args, 'objects' );
 
 		foreach ( $post_types as $post_type ) {
@@ -271,5 +273,16 @@ class LLMS_Txt_Admin {
 		$output['enable_md_support'] = isset( $input['enable_md_support'] ) ? 'yes' : 'no';
 
 		return $output;
+	}
+
+	/**
+	 * Add plugin action link to the Settings page.
+	 *
+	 * @param array $links The existing links.
+	 * @return array
+	 */
+	public function add_action_links( $links ) {
+		$links[] = '<a href="' . esc_url( admin_url( 'options-general.php?page=llms-txt-settings' ) ) . '">' . esc_html__( 'Settings', 'llms-txt-for-wp' ) . '</a>';
+		return $links;
 	}
 }

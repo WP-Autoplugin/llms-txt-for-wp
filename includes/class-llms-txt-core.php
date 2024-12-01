@@ -47,6 +47,7 @@ class LLMS_Txt_Core {
 		$this->admin = new LLMS_Txt_Admin();
 		add_action( 'admin_menu', array( $this->admin, 'add_plugin_admin_menu' ) );
 		add_action( 'admin_init', array( $this->admin, 'register_settings' ) );
+		add_filter( 'plugin_action_links_' . plugin_basename( LLMS_TXT_PLUGIN_FILE ), array( $this->admin, 'add_action_links' ) );
 
 		// Public hooks.
 		$this->public = new LLMS_Txt_Public();

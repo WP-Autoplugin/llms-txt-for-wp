@@ -75,7 +75,9 @@ class LLMS_Txt_Public {
 		$should_include = in_array( $post->post_type, $settings['post_types'], true );
 		$should_include = apply_filters( 'llms_txt_include_post', $should_include, $post );
 		if ( ! $should_include ) {
-			return;
+			// Redirect to the .md-less version of the post.
+			wp_redirect( get_permalink( $post ) );
+			exit;
 		}
 
 		// Prepare the Markdown content.
@@ -138,11 +140,13 @@ class LLMS_Txt_Public {
 			} else {
 				// If .md support is not enabled, show the post title and content.
 				foreach ( $settings['post_types'] as $post_type ) {
-					$posts = get_posts( array(
+					$args = array(
 						'post_type'      => $post_type,
 						'posts_per_page' => $settings['posts_limit'],
 						'post_status'    => 'publish',
-					) );
+					);
+					$args = apply_filters( 'llms_txt_posts_args', $args, $post_type );
+					$posts = get_posts( $args );
 
 					if ( ! empty( $posts ) ) {
 						foreach ( $posts as $post ) {
