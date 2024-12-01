@@ -1,12 +1,12 @@
 # LLMs.txt for WP
 
-**Contributors:** Balázs Piller\
-**Tags:** markdown, SEO, llms, content generation\
 **Requires at least:** 5.0\
 **Tested up to:** 6.7.1\
-**Stable tag:** 1.0\
+**Stable tag:** 1.0.0\
+**Tags:** markdown, SEO, llms, content generation\
 **License:** GPL v2 or later\
 **License URI:** [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
+**Contributors:** pbalazs\
 
 ## Description
 
