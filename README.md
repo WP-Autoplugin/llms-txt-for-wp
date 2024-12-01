@@ -64,6 +64,10 @@ Yes! The plugin can be configured to include specific post types and limit the n
 
 ![Markdown Output](assets/screenshot-2.png)
 
+## Demo
+
+You can view a demo of the plugin in action on my blog at [WebWizWork.com](https://www.webwizwork.com/llms.txt).
+
 ## Changelog
 
 ### 1.0.0
