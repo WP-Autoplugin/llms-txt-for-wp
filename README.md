@@ -6,7 +6,7 @@
 **Tags:** markdown, SEO, llms, content generation\
 **License:** GPL v2 or later\
 **License URI:** [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)\
-**Contributors:** pbalazs\
+**Contributors:** pbalazs
 
 ## Description
 
