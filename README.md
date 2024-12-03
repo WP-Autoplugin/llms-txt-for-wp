@@ -1,15 +1,5 @@
 # LLMs.txt for WP
 
-**Requires at least:** 5.0\
-**Tested up to:** 6.7.1\
-**Stable tag:** 1.0.0\
-**Tags:** markdown, SEO, llms, content generation\
-**License:** GPL v2 or later\
-**License URI:** [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)\
-**Contributors:** pbalazs
-
-## Description
-
 LLMs.txt for WP is a WordPress plugin designed to generate machine-learning-friendly content from your site. It automatically creates an `llms.txt` file that compiles key content in a standardized format, making your site ready for Large Language Models (LLMs). This ensures that your content can be easily discovered and utilized by AI tools and applications.
 
 Additionally, this plugin allows you to access **Markdown versions of your posts** by appending `.md` to the post URLs.
@@ -54,7 +44,7 @@ For more information on the `llms.txt` standard, visit the official website: [ht
 
 ### Why use the llms.txt standard?
 
-The `llms.txt` standard allows webmasters to provide structured data for Large Language Models, similar to how `robots.txt` serves search engines. This can improve the discoverability and usability of your content by AI tools, while also giving you control over what is included.
+The `llms.txt` standard allows webmasters to provide structured data for Large Language Models, similar to how `robots.txt` serves search engines. This can improve the discoverability and usability of your content by AI tools, while also giving you control over what is included. It's [quickly becoming a standard practice](https://directory.llmstxt.cloud/) for AI-friendly websites.
 
 ### How do I access the Markdown versions of posts?
 
