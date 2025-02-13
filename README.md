@@ -87,3 +87,5 @@ Contributions are welcome! Feel free to fork the repository, submit issues, or c
 ---
 
 **Note:** This plugin uses the [league/html-to-markdown](https://github.com/thephpleague/html-to-markdown) library for HTML to Markdown conversion.
+
+Stable tag: 1.0.0
