@@ -16,8 +16,16 @@ class LLMS_Txt_Markdown {
 	 * @return string
 	 */
 	public static function convert( $html ) {
-		// Using an external library ensures accurate and maintainable conversions.
-		$converter = new HtmlConverter( array( 'strip_tags' => true ) );
+		$markdown_arguments = array(
+			'strip_tags' => true,
+		);
+
+		/**
+		 * Filter the arguments used for converting HTML to Markdown.
+		 */
+		$markdown_arguments = apply_filters( 'llms_txt_markdown_arguments', $markdown_arguments );
+
+		$converter = new HtmlConverter( $markdown_arguments );
 		return $converter->convert( $html );
 	}
 
