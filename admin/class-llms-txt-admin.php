@@ -117,7 +117,17 @@ class LLMS_Txt_Admin {
 						<?php esc_html_e( 'Markdown versions of posts will not be available when you add the .md extension to the URL.', 'llms-txt-for-wp' ); ?>
 					</span>
 				</p>
-				<?php submit_button(); ?>
+				<div style="margin-top: 30px; display: flex; align-items: center; gap: 16px;">
+					<?php submit_button( null, 'primary', null, false ); ?>
+					<p class="description" style="margin: 0;">
+						<?php
+						printf(
+							esc_html__( 'Tip: you can use the available %1$s to customize the content of your llms.txt file.', 'llms-txt-for-wp' ),
+							'<a href="https://github.com/search?q=repo%3AWP-Autoplugin%2Fllms-txt-for-wp%20apply_filters&type=code" target="_blank">' . esc_html__( 'filter hooks', 'llms-txt-for-wp' ) . '</a>'
+						);
+						?>
+					</p>
+				</div>
 			</form>
 		</div>
 		<script>
