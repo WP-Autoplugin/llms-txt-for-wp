@@ -20,6 +20,22 @@ class LLMS_Txt_Public {
 	}
 
 	/**
+	 * Check if the request explicitly accepts Markdown.
+	 *
+	 * @return bool
+	 */
+	private function request_accepts_markdown() {
+		$accept_header = isset( $_SERVER['HTTP_ACCEPT'] ) ? $_SERVER['HTTP_ACCEPT'] : '';
+		if ( '' === $accept_header && function_exists( 'getallheaders' ) ) {
+			$headers = getallheaders();
+			if ( is_array( $headers ) && isset( $headers['Accept'] ) ) {
+				$accept_header = $headers['Accept'];
+			}
+		}
+		return false !== stripos( $accept_header, 'text/markdown' );
+	}
+
+	/**
 	 * Add rewrite rules for markdown endpoints.
 	 */
 	public function add_rewrite_rules() {
@@ -62,11 +78,18 @@ class LLMS_Txt_Public {
 
 		$settings = LLMS_Txt_Core::get_settings();
 
-		if ( 'yes' !== $settings['enable_md_support'] || ! get_query_var( 'markdown' ) ) {
+		$accepts_markdown = $this->request_accepts_markdown();
+
+		if ( 'yes' !== $settings['enable_md_support'] || ( ! get_query_var( 'markdown' ) && ! $accepts_markdown ) ) {
 			return;
 		}
 
-		$post = get_post();
+		$post_id = get_queried_object_id();
+		if ( ! $post_id || ! is_singular() ) {
+			return;
+		}
+
+		$post = get_post( $post_id );
 		if ( ! $post ) {
 			return;
 		}
@@ -75,9 +98,12 @@ class LLMS_Txt_Public {
 		$should_include = in_array( $post->post_type, $settings['post_types'], true );
 		$should_include = apply_filters( 'llms_txt_include_post', $should_include, $post );
 		if ( ! $should_include ) {
-			// Redirect to the .md-less version of the post.
-			wp_redirect( get_permalink( $post ) );
-			exit;
+			if ( get_query_var( 'markdown' ) ) {
+				// Redirect to the .md-less version of the post.
+				wp_redirect( get_permalink( $post ) );
+				exit;
+			}
+			return;
 		}
 
 		// Prepare the Markdown content.
@@ -169,5 +195,35 @@ class LLMS_Txt_Public {
 		header( 'Content-Type: text/plain; charset=utf-8' );
 		echo apply_filters( 'llms_txt_index_content', $output ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Content is already escaped.
 		exit;
+	}
+
+	/**
+	 * Output an alternate Markdown link in the document head.
+	 */
+	public function output_markdown_alternate_link() {
+		$settings = LLMS_Txt_Core::get_settings();
+
+		if ( 'yes' !== $settings['enable_md_support'] || ! is_singular() ) {
+			return;
+		}
+
+		$post_id = get_queried_object_id();
+		if ( ! $post_id ) {
+			return;
+		}
+
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return;
+		}
+
+		$should_include = in_array( $post->post_type, $settings['post_types'], true );
+		$should_include = apply_filters( 'llms_txt_include_post', $should_include, $post );
+		if ( ! $should_include ) {
+			return;
+		}
+
+		$markdown_url = untrailingslashit( get_permalink( $post ) ) . '.md';
+		echo '<link rel="alternate" type="text/markdown" href="' . esc_url( $markdown_url ) . "\" />\n";
 	}
 }

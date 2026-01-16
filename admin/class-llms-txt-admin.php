@@ -77,7 +77,7 @@ class LLMS_Txt_Admin {
 
 		add_settings_field(
 			'enable_md_support',
-			__( 'Enable *.md Support', 'llms-txt-for-wp' ),
+			__( 'Markdown Support', 'llms-txt-for-wp' ),
 			array( $this, 'render_md_support_field' ),
 			'llms-txt-settings',
 			'llms_txt_general_section'
@@ -108,13 +108,13 @@ class LLMS_Txt_Admin {
 						<?php
 						printf(
 							// translators: %1$s is a list of post types.
-							esc_html__( 'Markdown versions will also be available when you add the .md extension to the URL of %1$s.', 'llms-txt-for-wp' ),
+							esc_html__( 'Markdown versions will also be available when you add the .md extension to the URL of %1$s or request Markdown with the "Accept" header.', 'llms-txt-for-wp' ),
 							'<strong id="llms-txt-settings-hint-md-support-post-types"></strong>'
 						);
 						?>
 					</span>
 					<span id="llms-txt-settings-hint-no-md-support" style="display: none;">
-						<?php esc_html_e( 'Markdown versions of posts will not be available when you add the .md extension to the URL.', 'llms-txt-for-wp' ); ?>
+						<?php esc_html_e( 'Markdown versions of posts will not be available when you add the .md extension to the URL or request Markdown with the "Accept" header.', 'llms-txt-for-wp' ); ?>
 					</span>
 				</p>
 				<div style="margin-top: 30px; display: flex; align-items: center; gap: 16px;">

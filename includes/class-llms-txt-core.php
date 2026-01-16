@@ -56,6 +56,7 @@ class LLMS_Txt_Core {
 		add_filter( 'query_vars', array( $this->public, 'add_query_vars' ) );
 		add_action( 'template_redirect', array( $this->public, 'handle_markdown_requests' ), 1 );
 		add_action( 'template_redirect', array( $this->public, 'handle_llms_txt_requests' ), 1 );
+		add_action( 'wp_head', array( $this->public, 'output_markdown_alternate_link' ) );
 
 		// Activation hook to flush rewrite rules.
 		register_activation_hook( LLMS_TXT_PLUGIN_FILE, array( $this, 'activate' ) );

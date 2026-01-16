@@ -2,7 +2,7 @@
 
 LLMs.txt for WP is a WordPress plugin designed to generate machine-learning-friendly content from your site. It automatically creates an `llms.txt` file that compiles key content in a standardized format, making your site ready for Large Language Models (LLMs). This ensures that your content can be easily discovered and utilized by AI tools and applications.
 
-Additionally, this plugin allows you to access **Markdown versions of your posts** by appending `.md` to the post URLs.
+Additionally, this plugin allows you to access **Markdown versions of your posts** by appending `.md` to the post URLs or by sending an `Accept: text/markdown` header. Posts automatically include a `<link rel="alternate" type="text/markdown">` tag in their headers for better discoverability.
 
 ### About the `llms.txt` Standard
 
@@ -48,7 +48,10 @@ The `llms.txt` standard allows webmasters to provide structured data for Large L
 
 ### How do I access the Markdown versions of posts?
 
-Once Markdown support is enabled, append `.md` to any post's URL (e.g., `https://example.com/your-post.md`) to view it in Markdown format.
+Once Markdown support is enabled, you can access Markdown versions in three ways:
+1. Append `.md` to any post's URL (e.g., `https://example.com/your-post.md`)
+2. Send an `Accept: text/markdown` header in your HTTP request
+3. Look for the `<link rel="alternate" type="text/markdown">` tag in the post's HTML header to discover the Markdown version
 
 ### Can I control which posts are included in llms.txt?
 
@@ -70,6 +73,10 @@ You can view a demo of the plugin in action on my blog at [WebWizWork.com](https
 
 ## Changelog
 
+### 1.1.0
+- Markdown versions can now be accessed by sending the "Accept: text/markdown" header.
+- link rel="alternate" type="text/markdown" added to post headers for better discoverability of Markdown versions.
+
 ### 1.0.0
 
 - Initial release of LLMs.txt for WP.
@@ -88,4 +95,4 @@ Contributions are welcome! Feel free to fork the repository, submit issues, or c
 
 **Note:** This plugin uses the [league/html-to-markdown](https://github.com/thephpleague/html-to-markdown) library for HTML to Markdown conversion.
 
-Stable tag: 1.0.0
+Stable tag: 1.1.0
