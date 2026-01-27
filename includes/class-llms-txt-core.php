@@ -84,12 +84,19 @@ class LLMS_Txt_Core {
 	 */
 	public static function get_settings() {
 		$defaults = array(
+			'source'            => 'custom',
+			'custom_text'       => '',
 			'selected_post'     => '',
 			'post_types'        => array(),
 			'posts_limit'       => 100,
 			'enable_md_support' => 'yes',
 		);
 
-		return wp_parse_args( get_option( 'llms_txt_settings', array() ), $defaults );
+		$options = get_option( 'llms_txt_settings', array() );
+		if ( is_array( $options ) && ! isset( $options['source'] ) ) {
+			$options['source'] = 'page';
+		}
+
+		return wp_parse_args( $options, $defaults );
 	}
 }

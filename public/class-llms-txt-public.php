@@ -125,8 +125,11 @@ class LLMS_Txt_Public {
 
 		$settings = LLMS_Txt_Core::get_settings();
 		$output   = '';
+		$source   = isset( $settings['source'] ) ? $settings['source'] : 'custom';
 
-		if ( ! empty( $settings['selected_post'] ) ) {
+		if ( 'custom' === $source ) {
+			$output .= isset( $settings['custom_text'] ) ? $settings['custom_text'] : '';
+		} elseif ( ! empty( $settings['selected_post'] ) ) {
 			// Selected post/page.
 			$post = get_post( $settings['selected_post'] );
 			if ( $post ) {
