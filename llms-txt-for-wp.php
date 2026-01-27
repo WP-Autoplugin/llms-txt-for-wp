@@ -3,7 +3,7 @@
  * Plugin Name: LLMs.txt for WP
  * Plugin URI: https://github.com/WP-Autoplugin/llms-txt-for-wp
  * Description: Generates LLM-friendly content as llms.txt and provides markdown versions of posts.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Balázs Piller
  * Author URI: https://wp-autoplugin.com
  * License: GPL v2 or later
@@ -20,7 +20,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Define constants.
-define( 'LLMS_TXT_VERSION', '1.1.0' );
+define( 'LLMS_TXT_VERSION', '1.2.0' );
 define( 'LLMS_TXT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'LLMS_TXT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'LLMS_TXT_PLUGIN_FILE', __FILE__ );
