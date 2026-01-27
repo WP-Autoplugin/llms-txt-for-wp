@@ -16,6 +16,7 @@ class LLMS_Txt_Public {
 	public function add_query_vars( $vars ) {
 		$vars[] = 'markdown';
 		$vars[] = 'llms_txt';
+		$vars[] = 'llms_txt_parent';
 		return $vars;
 	}
 
@@ -42,6 +43,11 @@ class LLMS_Txt_Public {
 		add_rewrite_rule(
 			'^llms\.txt$',
 			'index.php?llms_txt=1',
+			'top'
+		);
+		add_rewrite_rule(
+			'^(.+?)/llms\.txt$',
+			'index.php?llms_txt=1&llms_txt_parent=$matches[1]',
 			'top'
 		);
 	}
@@ -126,15 +132,50 @@ class LLMS_Txt_Public {
 		$settings = LLMS_Txt_Core::get_settings();
 		$output   = '';
 		$source   = isset( $settings['source'] ) ? $settings['source'] : 'custom';
+		$append_llms_pages = false;
+		$request_parent = get_query_var( 'llms_txt_parent' );
+		$request_parent = is_string( $request_parent ) ? trim( $request_parent, '/' ) : '';
 
 		if ( 'custom' === $source ) {
 			$output .= isset( $settings['custom_text'] ) ? $settings['custom_text'] : '';
+			$append_llms_pages = true;
+		} elseif ( 'llms_txt_page' === $source ) {
+			// Output a llms.txt Page
+			$llms_page = null;
+			if ( '' !== $request_parent ) {
+				// Check if the page has a parent set
+				$matched_pages = get_posts(
+					array(
+						'post_type'      => 'llms_txt_page',
+						'post_status'    => 'publish',
+						'posts_per_page' => 1,
+						'meta_key'       => '_llms_txt_output_parent',
+						'meta_value'     => $request_parent,
+					)
+				);
+				if ( ! empty( $matched_pages ) ) {
+					$llms_page = $matched_pages[0];
+				}
+			}
+			// Get the selected llms.txt page
+			if ( ! $llms_page && '' === $request_parent && ! empty( $settings['selected_llms_page'] ) ) {
+				$llms_page = get_post( $settings['selected_llms_page'] );
+			}
+			if ( $llms_page && 'llms_txt_page' === $llms_page->post_type ) {
+				$header = $this->build_llms_txt_page_header( $llms_page, $settings );
+				if ( '' !== $header ) {
+					$output .= $header . "\n\n";
+				}
+				$output .= LLMS_Txt_Markdown::convert_post_to_markdown( $llms_page, false );
+				$append_llms_pages = true;
+			}
 		} elseif ( ! empty( $settings['selected_post'] ) ) {
 			// Selected post/page.
 			$post = get_post( $settings['selected_post'] );
 			if ( $post ) {
 				// Output post title and content.
 				$output .= LLMS_Txt_Markdown::convert_post_to_markdown( $post );
+				$append_llms_pages = true;
 			}
 		} elseif ( ! empty( $settings['post_types'] ) ) {
 			// All posts, grouped by post type. Also include site name and description.
@@ -185,6 +226,7 @@ class LLMS_Txt_Public {
 					}
 				}
 			}
+			$append_llms_pages = true;
 		} else {
 			$output .= '# ' . esc_html( get_bloginfo( 'name' ) ) . "\n\n";
 			$bloginfo = get_bloginfo( 'description' );
@@ -192,12 +234,77 @@ class LLMS_Txt_Public {
 				$output .= esc_html( $bloginfo ) . "\n\n";
 			}
 			$output .= "---\n\n";
+			$append_llms_pages = true;
+		}
+
+		if ( $append_llms_pages ) {
+			$output .= $this->maybe_append_llms_txt_pages_section( $settings, $request_parent );
 		}
 
 		// Output the llms.txt content with proper headers.
 		header( 'Content-Type: text/plain; charset=utf-8' );
 		echo apply_filters( 'llms_txt_index_content', $output ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Content is already escaped.
 		exit;
+	}
+
+	/**
+	 * Append links to all llms.txt Pages when enabled and on the root llms.txt.
+	 *
+	 * @param array  $settings Plugin settings.
+	 * @param string $request_parent Parent segment from rewrite.
+	 * @return string
+	 */
+	private function maybe_append_llms_txt_pages_section( $settings, $request_parent ) {
+		if ( 'yes' !== $settings['include_all_llms_pages'] || '' !== $request_parent ) {
+			return '';
+		}
+
+		$pages = get_posts(
+			array(
+				'post_type'      => 'llms_txt_page',
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'orderby'        => 'title',
+				'order'          => 'ASC',
+			)
+		);
+
+		if ( empty( $pages ) ) {
+			return '';
+		}
+
+		$header = isset( $settings['include_all_llms_pages_header'] ) ? trim( $settings['include_all_llms_pages_header'] ) : '';
+		$lines = array();
+		foreach ( $pages as $page ) {
+			$parent = $this->get_llms_txt_page_output_parent( $page );
+			if ( '' === $parent ) {
+				continue;
+			}
+			$url = home_url( trailingslashit( $parent ) . 'llms.txt' );
+			$scope = trim( (string) get_post_meta( $page->ID, '_llms_txt_header_scope', true ) );
+			$authority = trim( (string) get_post_meta( $page->ID, '_llms_txt_header_authority_level', true ) );
+			$line = '- ' . esc_html( $page->post_title ) . '  ';
+			if ( '' !== $scope ) {
+				$line .= "\n  Scope: " . esc_html( $scope ) . '  ';
+			}
+			if ( '' !== $authority ) {
+				$line .= "\n  Authority: " . esc_html( $authority ) . '  ';
+			}
+			$line .= "\n  URL: " . esc_url( $url ) . "\n";
+			$lines[] = $line;
+		}
+
+		if ( empty( $lines ) ) {
+			return '';
+		}
+
+		$output = "\n\n";
+		if ( '' !== $header ) {
+			$output .= $header . "\n\n";
+		}
+		$output .= implode( "\n", $lines ) . "\n";
+
+		return $output;
 	}
 
 	/**
@@ -228,5 +335,111 @@ class LLMS_Txt_Public {
 
 		$markdown_url = untrailingslashit( get_permalink( $post ) ) . '.md';
 		echo '<link rel="alternate" type="text/markdown" href="' . esc_url( $markdown_url ) . "\" />\n";
+	}
+
+	/**
+	 * Build the header for llms.txt Page output using the template and meta fields.
+	 *
+	 * @param WP_Post $llms_page llms.txt Page post.
+	 * @param array   $settings Plugin settings.
+	 * @return string
+	 */
+	private function build_llms_txt_page_header( $llms_page, $settings ) {
+		$template = isset( $settings['header_template'] ) ? $settings['header_template'] : '';
+		if ( '' === $template ) {
+			return '';
+		}
+
+		$meta = array(
+			'post_title'      => $llms_page->post_title,
+			'scope'           => get_post_meta( $llms_page->ID, '_llms_txt_header_scope', true ),
+			'canonical_url'   => $this->get_llms_txt_page_canonical_url( $llms_page ),
+			'post_author'     => $this->get_llms_txt_page_maintainer( $llms_page ),
+			'authority_level' => get_post_meta( $llms_page->ID, '_llms_txt_header_authority_level', true ),
+			'content_type'    => get_post_meta( $llms_page->ID, '_llms_txt_header_content_type', true ),
+			'last_updated'    => $this->get_llms_txt_page_last_updated( $llms_page ),
+		);
+
+		$replacements = array();
+		foreach ( $meta as $key => $value ) {
+			if ( '' !== $value ) {
+				$replacements[ '{' . $key . '}' ] = $value;
+			}
+		}
+		if ( ! empty( $replacements ) ) {
+			$template = strtr( $template, $replacements );
+		}
+
+		$lines = preg_split( "/\r\n|\r|\n/", $template );
+		$header_lines = array();
+		foreach ( $lines as $line ) {
+			$trimmed = trim( $line );
+			if ( '' === $trimmed ) {
+				continue;
+			}
+
+			if ( preg_match( '/\{[a-z_]+\}/', $trimmed ) ) {
+				continue;
+			}
+
+			$header_lines[] = $trimmed;
+		}
+
+		return implode( "\n", $header_lines );
+	}
+
+	/**
+	 * Get the llms.txt Page maintainer name from the post author.
+	 *
+	 * @param WP_Post $llms_page llms.txt Page post.
+	 * @return string
+	 */
+	private function get_llms_txt_page_maintainer( $llms_page ) {
+		$display_name = get_the_author_meta( 'display_name', $llms_page->post_author );
+		if ( '' !== $display_name ) {
+			return $display_name;
+		}
+		$user = get_userdata( $llms_page->post_author );
+		return $user ? $user->user_login : '';
+	}
+
+	/**
+	 * Get the llms.txt Page last updated date in YYYY-MM-DD.
+	 *
+	 * @param WP_Post $llms_page llms.txt Page post.
+	 * @return string
+	 */
+	private function get_llms_txt_page_last_updated( $llms_page ) {
+		$timestamp = get_post_modified_time( 'U', false, $llms_page );
+		if ( ! $timestamp ) {
+			return '';
+		}
+		return date_i18n( 'Y-m-d', $timestamp );
+	}
+
+	/**
+	 * Get the output parent path for the llms.txt Page.
+	 *
+	 * @param WP_Post $llms_page llms.txt Page post.
+	 * @return string
+	 */
+	private function get_llms_txt_page_output_parent( $llms_page ) {
+		$parent = get_post_meta( $llms_page->ID, '_llms_txt_output_parent', true );
+		$parent = is_string( $parent ) ? trim( $parent ) : '';
+		return trim( $parent, '/' );
+	}
+
+	/**
+	 * Build the canonical URL from the output parent path.
+	 *
+	 * @param WP_Post $llms_page llms.txt Page post.
+	 * @return string
+	 */
+	private function get_llms_txt_page_canonical_url( $llms_page ) {
+		$parent = $this->get_llms_txt_page_output_parent( $llms_page );
+		if ( '' === $parent ) {
+			return home_url( 'llms.txt' );
+		}
+		return home_url( trailingslashit( $parent ) . 'llms.txt' );
 	}
 }
