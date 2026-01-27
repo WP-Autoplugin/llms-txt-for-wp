@@ -443,7 +443,7 @@ class LLMS_Txt_Admin {
 			);
 		}
 		echo '</select>';
-		echo '<p class="description">' . esc_html__( 'Choose the llms.txt Page to output in llms.txt.', 'llms-txt-for-wp' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Choose the llms.txt Page to output in llms.txt. Content is output as-is (no HTML-to-Markdown conversion).', 'llms-txt-for-wp' ) . '</p>';
 		echo '</div>';
 	}
 

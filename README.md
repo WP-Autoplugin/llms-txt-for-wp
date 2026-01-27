@@ -43,7 +43,6 @@ For more information on the `llms.txt` standard, visit the official website: [ht
 - **llms.txt Source**: Choose Custom Text, Page, or LLMs.txt Page.
 - **Header Template**: Customize the header output for LLMs.txt Pages with placeholders.
 - **LLMs.txt Page**: Pick the LLMs.txt Page to output.
-- **Output Parent** (in LLMs.txt Page): Set a parent path to serve a nested llms.txt endpoint.
 - **Include All llms.txt Pages**: Append a child references section to the root llms.txt.
 - **Include Header**: Customize the header text shown above the child references list.
 - **Post Types to Include**: Define which types of content (e.g., posts, pages) appear in `llms.txt`.
@@ -87,7 +86,7 @@ You can view a demo of the plugin in action on my blog at [WebWizWork.com](https
 
 ## Changelog
 
-### 1.2.0
+### 1.2.1
 - Added LLMs.txt Page custom post type with clean editor mode.
 - Added header templates with placeholder support for llms.txt output.
 - Added Output Parent support to serve llms.txt under nested paths.

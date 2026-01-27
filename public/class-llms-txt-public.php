@@ -166,7 +166,7 @@ class LLMS_Txt_Public {
 				if ( '' !== $header ) {
 					$output .= $header . "\n\n";
 				}
-				$output .= LLMS_Txt_Markdown::convert_post_to_markdown( $llms_page, false );
+				$output .= $llms_page->post_content;
 				$append_llms_pages = true;
 			}
 		} elseif ( ! empty( $settings['selected_post'] ) ) {
