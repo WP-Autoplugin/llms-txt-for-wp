@@ -15,6 +15,13 @@ class LLMS_Txt_Core {
 	private $admin;
 
 	/**
+	 * CPT instance.
+	 *
+	 * @var LLMS_Txt_CPT
+	 */
+	private $cpt;
+
+	/**
 	 * Public instance.
 	 *
 	 * @var LLMS_Txt_Public
@@ -35,6 +42,7 @@ class LLMS_Txt_Core {
 	private function load_dependencies() {
 		// Ideally use autoloading; here we require files directly.
 		require_once LLMS_TXT_PLUGIN_DIR . 'includes/class-llms-txt-markdown.php';
+		require_once LLMS_TXT_PLUGIN_DIR . 'includes/class-llms-txt-cpt.php';
 		require_once LLMS_TXT_PLUGIN_DIR . 'admin/class-llms-txt-admin.php';
 		require_once LLMS_TXT_PLUGIN_DIR . 'public/class-llms-txt-public.php';
 	}
@@ -49,6 +57,9 @@ class LLMS_Txt_Core {
 		add_action( 'admin_init', array( $this->admin, 'register_settings' ) );
 		add_filter( 'plugin_action_links_' . plugin_basename( LLMS_TXT_PLUGIN_FILE ), array( $this->admin, 'add_action_links' ) );
 
+		$this->cpt = new LLMS_Txt_CPT();
+		$this->cpt->init_hooks();
+
 		// Public hooks.
 		$this->public = new LLMS_Txt_Public();
 		add_action( 'init', array( $this->public, 'add_rewrite_rules' ) );
@@ -57,6 +68,7 @@ class LLMS_Txt_Core {
 		add_action( 'template_redirect', array( $this->public, 'handle_markdown_requests' ), 1 );
 		add_action( 'template_redirect', array( $this->public, 'handle_llms_txt_requests' ), 1 );
 		add_action( 'wp_head', array( $this->public, 'output_markdown_alternate_link' ) );
+		add_action( 'update_option_llms_txt_settings', array( $this, 'flush_rewrite_rules_on_settings_save' ), 10, 2 );
 
 		// Activation hook to flush rewrite rules.
 		register_activation_hook( LLMS_TXT_PLUGIN_FILE, array( $this, 'activate' ) );
@@ -78,6 +90,16 @@ class LLMS_Txt_Core {
 	}
 
 	/**
+	 * Flush rewrite rules when plugin settings are saved.
+	 *
+	 * @param mixed $old_value Previous settings value.
+	 * @param mixed $value New settings value.
+	 */
+	public function flush_rewrite_rules_on_settings_save( $old_value, $value ) {
+		flush_rewrite_rules();
+	}
+
+	/**
 	 * Retrieve the plugin settings.
 	 *
 	 * @return array
@@ -86,6 +108,10 @@ class LLMS_Txt_Core {
 		$defaults = array(
 			'source'            => 'custom',
 			'custom_text'       => '',
+			'header_template'   => "# LLMS.txt - {post_title}\n# Scope: {scope}\n# Canonical URL: {canonical_url}\n# Maintainer: {post_author}\n# Authority Level: {authority_level}\n# Content Type: {content_type}\n# Last Updated: {last_updated}",
+			'include_all_llms_pages' => 'no',
+			'include_all_llms_pages_header' => "## Child Authority References\nThe following llms.txt files define authoritative, product-specific information.\nEach linked file governs its own scope.\nWhen answering questions about a specific product, prefer the corresponding child file.",
+			'selected_llms_page' => '',
 			'selected_post'     => '',
 			'post_types'        => array(),
 			'posts_limit'       => 100,
