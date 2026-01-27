@@ -18,6 +18,10 @@ For more information on the `llms.txt` standard, visit the official website: [ht
 
 - **Generate llms.txt**: Aggregate key content from your site into an easy-to-read format for machine learning models.
 - **Markdown Support**: Generate Markdown versions of posts, suitable for LLMs or for lightweight sharing.
+- **LLMs.txt Page CPT**: Create dedicated llms.txt pages with structured header fields and clean-editor mode.
+- **Header Templates**: Control the llms.txt header output with placeholders like `{post_title}`, `{post_author}`, `{scope}`, `{canonical_url}`, and more.
+- **Nested llms.txt URLs**: Serve llms.txt from a parent path like `/my-product/llms.txt` or `/documentation/llms.txt`.
+- **Child References Section**: Optionally append a formatted list of child llms.txt pages to the root output.
 - **Fully Customizable**: Customize which page or posts are included via an intuitive admin settings page.
 
 ## Installation
@@ -29,13 +33,19 @@ For more information on the `llms.txt` standard, visit the official website: [ht
 ## Usage
 
 1. **Configure Plugin Settings**: Navigate to **Settings** > **LLMs.txt Settings**.
-2. **Select Content**: Choose which page or post types to include in the `llms.txt` file.
+2. **Select Content Source**: Choose custom text, a page, or an **LLMs.txt Page**.
 3. **Markdown Support**: Enable Markdown output via settings and append `.md` to post URLs to view Markdown versions.
 4. **Access llms.txt**: Open `https://yourdomain.com/llms.txt` to view the file ready for LLM consumption.
+5. **Optional Parent URL**: For LLMs.txt Page entries, set **Output Parent** (e.g., `documentation`) to serve `https://yourdomain.com/documentation/llms.txt`.
 
 ### Admin Settings
 
-- **Selected Content for llms.txt**: Include specific pages or posts.
+- **llms.txt Source**: Choose Custom Text, Page, or LLMs.txt Page.
+- **Header Template**: Customize the header output for LLMs.txt Pages with placeholders.
+- **LLMs.txt Page**: Pick the LLMs.txt Page to output.
+- **Output Parent** (in LLMs.txt Page): Set a parent path to serve a nested llms.txt endpoint.
+- **Include All llms.txt Pages**: Append a child references section to the root llms.txt.
+- **Include Header**: Customize the header text shown above the child references list.
 - **Post Types to Include**: Define which types of content (e.g., posts, pages) appear in `llms.txt`.
 - **Post Limit**: Set the maximum number of posts to include.
 - **Markdown Support**: Enable or disable `.md` file extension for post URLs.
@@ -57,6 +67,10 @@ Once Markdown support is enabled, you can access Markdown versions in three ways
 
 Yes! The plugin can be configured to include specific post types and limit the number of posts included in the `llms.txt` file. You can also choose to include a specific page only.
 
+### Can I create multiple llms.txt files under different URLs?
+
+Yes. Create multiple **LLMs.txt Page** entries and assign different **Output Parent** values (e.g., `my-product`, `documentation`). Then access each file at `https://yourdomain.com/{parent}/llms.txt`.
+
 ## Screenshots
 
 1. **Admin Settings Page** - Easily manage content for `llms.txt` and enable Markdown support.
@@ -72,6 +86,12 @@ Yes! The plugin can be configured to include specific post types and limit the n
 You can view a demo of the plugin in action on my blog at [WebWizWork.com](https://www.webwizwork.com/llms.txt).
 
 ## Changelog
+
+### 1.2.0
+- Added LLMs.txt Page custom post type with clean editor mode.
+- Added header templates with placeholder support for llms.txt output.
+- Added Output Parent support to serve llms.txt under nested paths.
+- Added optional child references section listing all llms.txt pages.
 
 ### 1.1.0
 - Markdown versions can now be accessed by sending the "Accept: text/markdown" header.
@@ -95,4 +115,4 @@ Contributions are welcome! Feel free to fork the repository, submit issues, or c
 
 **Note:** This plugin uses the [league/html-to-markdown](https://github.com/thephpleague/html-to-markdown) library for HTML to Markdown conversion.
 
-Stable tag: 1.1.0
+Stable tag: 1.2.0
