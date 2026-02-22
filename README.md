@@ -79,7 +79,6 @@ You can view a demo of the plugin in action on my blog at [WebWizWork.com](https
 - Added X-Markdown-Tokens header for Markdown responses to indicate the number of tokens in the Markdown output.
 - Added a Link header with rel="alternate" and type="text/markdown" for Markdown-ready pages to improve discoverability of Markdown versions by LLMs and other tools.
 
-
 ### 1.1.0
 - Markdown versions can now be accessed by sending the "Accept: text/markdown" header.
 - link rel="alternate" type="text/markdown" added to post headers for better discoverability of Markdown versions.
