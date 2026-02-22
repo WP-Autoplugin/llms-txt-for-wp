@@ -2,7 +2,7 @@
 
 LLMs.txt for WP is a WordPress plugin designed to generate machine-learning-friendly content from your site. It automatically creates an `llms.txt` file that compiles key content in a standardized format, making your site ready for Large Language Models (LLMs). This ensures that your content can be easily discovered and utilized by AI tools and applications.
 
-Additionally, this plugin allows you to access **Markdown versions of your posts** by appending `.md` to the post URLs or by sending an `Accept: text/markdown` header. Posts automatically include a `<link rel="alternate" type="text/markdown">` tag in their headers for better discoverability.
+Additionally, this plugin allows you to access **Markdown versions of your posts** by appending `.md` to the post URLs or by sending an `Accept: text/markdown` header. Posts automatically include a `<link rel="alternate" type="text/markdown">` tag in their HTML `<head>`, and a `Link` HTTP response header pointing to the Markdown version for better discoverability. Markdown responses include an `X-Markdown-Tokens` header indicating the token count of the output.
 
 ### About the `llms.txt` Standard
 
@@ -17,7 +17,7 @@ For more information on the `llms.txt` standard, visit the official website: [ht
 ### Key Features
 
 - **Generate llms.txt**: Aggregate key content from your site into an easy-to-read format for machine learning models.
-- **Markdown Support**: Generate Markdown versions of posts, suitable for LLMs or for lightweight sharing.
+- **Markdown Support**: Generate Markdown versions of posts, suitable for LLMs or for lightweight sharing. Markdown responses include an `X-Markdown-Tokens` header with the token count.
 - **Fully Customizable**: Customize which page or posts are included via an intuitive admin settings page.
 
 ## Installation
@@ -51,7 +51,9 @@ The `llms.txt` standard allows webmasters to provide structured data for Large L
 Once Markdown support is enabled, you can access Markdown versions in three ways:
 1. Append `.md` to any post's URL (e.g., `https://example.com/your-post.md`)
 2. Send an `Accept: text/markdown` header in your HTTP request
-3. Look for the `<link rel="alternate" type="text/markdown">` tag in the post's HTML header to discover the Markdown version
+3. Look for the `<link rel="alternate" type="text/markdown">` tag in the post's HTML `<head>` to discover the Markdown URL
+
+Markdown responses also include an `X-Markdown-Tokens` header indicating the approximate token count of the Markdown output, useful for LLM context management.
 
 ### Can I control which posts are included in llms.txt?
 
@@ -72,6 +74,11 @@ Yes! The plugin can be configured to include specific post types and limit the n
 You can view a demo of the plugin in action on my blog at [WebWizWork.com](https://www.webwizwork.com/llms.txt).
 
 ## Changelog
+
+## 1.1.1
+- Added X-Markdown-Tokens header for Markdown responses to indicate the number of tokens in the Markdown output.
+- Added a Link header with rel="alternate" and type="text/markdown" for Markdown-ready pages to improve discoverability of Markdown versions by LLMs and other tools.
+
 
 ### 1.1.0
 - Markdown versions can now be accessed by sending the "Accept: text/markdown" header.
@@ -95,4 +102,4 @@ Contributions are welcome! Feel free to fork the repository, submit issues, or c
 
 **Note:** This plugin uses the [league/html-to-markdown](https://github.com/thephpleague/html-to-markdown) library for HTML to Markdown conversion.
 
-Stable tag: 1.1.0
+Stable tag: 1.1.1
