@@ -109,8 +109,34 @@ class LLMS_Txt_Public {
 		// Prepare the Markdown content.
 		$markdown_content = LLMS_Txt_Markdown::convert_post_to_markdown( $post, true );
 
+		// Estimate token count (default: 1 token per 4 characters).
+		$chars_per_token  = apply_filters( 'llms_txt_chars_per_token', 4 );
+		$estimated_tokens = (int) ceil( mb_strlen( $markdown_content ) / max( 1, (int) $chars_per_token ) );
+
+		/**
+		 * Filter the headers sent with Markdown responses.
+		 *
+		 * Returning an empty array will suppress all headers. Headers are sent
+		 * as key => value pairs. Duplicate header names will overwrite each other.
+		 *
+		 * @param array   $headers  Associative array of header name => header value.
+		 * @param WP_Post $post     The post being rendered.
+		 * @param string  $markdown The converted Markdown content.
+		 */
+		$headers = apply_filters(
+			'llms_txt_markdown_headers',
+			array(
+				'Content-Type'      => 'text/markdown; charset=utf-8',
+				'X-Markdown-Tokens' => (string) $estimated_tokens,
+			),
+			$post,
+			$markdown_content
+		);
+
 		// Output the Markdown content with proper headers.
-		header( 'Content-Type: text/markdown; charset=utf-8' );
+		foreach ( $headers as $name => $value ) {
+			header( $name . ': ' . $value );
+		}
 		echo $markdown_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Content is escaped in the conversion method.
 		exit;
 	}
@@ -195,6 +221,36 @@ class LLMS_Txt_Public {
 		header( 'Content-Type: text/plain; charset=utf-8' );
 		echo apply_filters( 'llms_txt_index_content', $output ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Content is already escaped.
 		exit;
+	}
+
+	/**
+	 * Output an alternate Markdown link in the HTTP headers.
+	 */
+	public function output_markdown_alternate_header() {
+		$settings = LLMS_Txt_Core::get_settings();
+
+		if ( 'yes' !== $settings['enable_md_support'] || ! is_singular() ) {
+			return;
+		}
+
+		$post_id = get_queried_object_id();
+		if ( ! $post_id ) {
+			return;
+		}
+
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return;
+		}
+
+		$should_include = in_array( $post->post_type, $settings['post_types'], true );
+		$should_include = apply_filters( 'llms_txt_include_post', $should_include, $post );
+		if ( ! $should_include ) {
+			return;
+		}
+
+		$markdown_url = untrailingslashit( get_permalink( $post ) ) . '.md';
+		header( 'Link: <' . esc_url_raw( $markdown_url ) . '>; rel="alternate"; type="text/markdown"', false );
 	}
 
 	/**
