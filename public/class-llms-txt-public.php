@@ -128,6 +128,7 @@ class LLMS_Txt_Public {
 			array(
 				'Content-Type'      => 'text/markdown; charset=utf-8',
 				'X-Markdown-Tokens' => (string) $estimated_tokens,
+				'X-Robots-Tag'      => 'noindex',
 			),
 			$post,
 			$markdown_content
@@ -219,6 +220,7 @@ class LLMS_Txt_Public {
 
 		// Output the llms.txt content with proper headers.
 		header( 'Content-Type: text/plain; charset=utf-8' );
+		header( 'X-Robots-Tag: noindex' );
 		echo apply_filters( 'llms_txt_index_content', $output ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Content is already escaped.
 		exit;
 	}
